@@ -1,0 +1,142 @@
+<html>
+<head>
+  <title></title>
+  <link href='http://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+
+  </style>
+</head>
+<body>
+<canvas class="fullscreen"></canvas>
+<div id="dashboard">
+  <div class="widgets">
+    <div id="controls" class="dashboard-widget">
+    </div>
+    <div id="status" class="dashboard-widget">
+    </div>
+  </div>
+  <div class="bottom-panel">
+    <button>
+      <span class="red">R</span><span class="green">G</span><span class="blue">B</span> Plasma</button>
+  </div>
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>  
+<script src="dat.gui.min.js"></script>
+<script src="stats.js"></script>
+<script src="rgb_plasma.js"></script>
+<script>
+var $status = $("#status"), 
+  $dashboard= $("#dashboard"), 
+  $controls = $("#controls"), 
+  debug = false,
+  showOverlay = false;
+
+//$dashboard.css("bottom", innerHeight);
+  
+var Settings = {
+  red: 1,
+  green: 1,
+  blue: 1,
+  ringSize: 5,
+  ring1: 0.3,
+  ring2: 2,
+  ringsEnabled: true,
+  quality: 4
+};
+
+// dat.gui.js
+var gui = new dat.GUI({ autoPlace: false });
+var r = gui.add(Settings, 'red', 0, 5).step(1);
+var g = gui.add(Settings, 'green', 0, 5).step(1);
+var b = gui.add(Settings, 'blue', 0, 5).step(1);
+
+gui.add(Settings, 'ringsEnabled', true);
+gui.add(Settings, 'ringSize', 1, 40);
+gui.add(Settings, 'ring1', 0.01, 5);
+gui.add(Settings, 'ring2', 0.01, 5);
+
+var q = gui.add(Settings, 'quality', { Normal: 4, High: 2, Ultra: 1 });
+q.onChange(project.reset);
+
+r.onChange(project.reset);
+g.onChange(project.reset);
+b.onChange(project.reset);
+
+$controls.append( gui.domElement );
+
+// stats.js
+var stats = new Stats();
+$dashboard
+  .find('.widgets')
+  .append($(stats.getDomElement()).attr("id", "stats").addClass("dashboard-widget") );
+
+
+$(document).keydown(function(e) { 
+  if ( e.which== 27 ) toggleDashboard();    
+  if ( e.which == 79 ) showOverlay = !showOverlay;
+
+});
+
+$("button").click(toggleDashboard)
+
+function toggleDashboard() {
+  debug=!debug;
+  $dashboard.animate({ 
+    top : debug ? 0 : -$dashboard.outerHeight()
+  }, 
+  { 
+    duration : "fast"
+  }); 
+}
+
+function positionDashboard () {
+  $dashboard.css({ 
+    top : debug ? 0 : -$dashboard.outerHeight()
+  });
+}
+
+// shim layer with setTimeout fallback
+window.requestAnimFrame = (function(){
+  return  window.requestAnimationFrame       || 
+          window.webkitRequestAnimationFrame || 
+          window.mozRequestAnimationFrame    || 
+          window.oRequestAnimationFrame      || 
+          window.msRequestAnimationFrame     || 
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
+})();
+
+if (!String.prototype.format) {
+    String.prototype.supplant = function (o) {
+        return this.replace(/{([^{}]*)}/g,
+            function (a, b) {
+                var r = o[b];
+                return typeof r === 'string' || typeof r === 'number' ? r : a;
+            }
+        );
+    };
+}
+
+function drawVector (x,y, v) {
+  var direction = Math.atan2(v.y, v.x);
+  var magnitude = Math.sqrt(v.x*v.x + v.y*v.y);
+  var x2 = x+Math.cos(direction) * magnitude;
+  var y2 = y+Math.sin(direction) * magnitude;
+
+  line(x,y,x2,y2);  
+}
+
+function line(x1,y1,x2,y2) {
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+}
+
+$(project.run);
+</script>
+</body>
+</html>
