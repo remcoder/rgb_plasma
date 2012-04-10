@@ -25,6 +25,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>  
 <script src="dat.gui.min.js"></script>
 <script src="stats.js"></script>
+<script src="point.js"></script>
 <script src="rgb_plasma.js"></script>
 <script>
 var $status = $("#status"), 
@@ -39,30 +40,104 @@ var Settings = {
   red: 1,
   green: 1,
   blue: 1,
-  ringSize: 5,
+  ringSize: 10,
   ring1: 0.3,
   ring2: 2,
   ringsEnabled: true,
-  quality: 4
+  quality: 4,
+  method : "max"
 };
 
+
+
+
 // dat.gui.js
-var gui = new dat.GUI({ autoPlace: false });
+var gui = new dat.GUI({ autoPlace: false, load: {
+  "preset": "trippy",
+  "remembered": {
+    "Default": {
+      "0": {
+        "red": 1,
+        "green": 1,
+        "blue": 1,
+        "ringSize": 10,
+        "method": "max",
+        "ringsEnabled": true,
+        "ring1": 0.3,
+        "ring2": 2,
+        "quality": 4
+      }
+    },
+    "oldskool": {
+      "0": {
+        "red": 2,
+        "green": 0,
+        "blue": 0,
+        "ringSize": 8.206521739130434,
+        "method": "xor",
+        "ringsEnabled": true,
+        "ring1": 0.3,
+        "ring2": 2,
+        "quality": "4"
+      }
+    },
+    "additive": {
+      "0": {
+        "red": 1,
+        "green": 1,
+        "blue": 1,
+        "ringSize": 8.206521739130434,
+        "method": "max",
+        "ringsEnabled": false,
+        "ring1": 0.9,
+        "ring2": 2,
+        "quality": "4"
+      }
+    },
+    "trippy": {
+      "0": {
+        "red": 2,
+        "green": 2,
+        "blue": 2,
+        "ringSize": 10,
+        "method": "xor",
+        "ringsEnabled": false,
+        "ring1": 0.3,
+        "ring2": 2,
+        "quality": 4
+      }
+    }
+  },
+  "closed": false,
+  "folders": {
+    "settings for max": {
+      "preset": "Default",
+      "closed": true,
+      "folders": {}
+    }
+  }
+} });
+gui.remember(Settings);
+
 var r = gui.add(Settings, 'red', 0, 5).step(1);
 var g = gui.add(Settings, 'green', 0, 5).step(1);
 var b = gui.add(Settings, 'blue', 0, 5).step(1);
 
-gui.add(Settings, 'ringsEnabled', true);
 gui.add(Settings, 'ringSize', 1, 40);
-gui.add(Settings, 'ring1', 0.01, 5);
-gui.add(Settings, 'ring2', 0.01, 5);
 
-var q = gui.add(Settings, 'quality', { Normal: 4, High: 2, Ultra: 1 });
-q.onChange(project.reset);
+var m = gui.add(Settings, 'method', { XOR: "xor", MAX: "max" });
+var f2 = gui.addFolder('settings for max');
 
-r.onChange(project.reset);
-g.onChange(project.reset);
-b.onChange(project.reset);
+f2.add(Settings, 'ringsEnabled', true);
+f2.add(Settings, 'ring1', 0.01, 5);
+f2.add(Settings, 'ring2', 0.01, 5);
+
+var q = gui.add(Settings, 'quality', { crap: 16, low: 8, normal: 4, high: 2, ultra: 1 });
+q.onChange(RgbPlasma.reset);
+
+r.onChange(RgbPlasma.reset);
+g.onChange(RgbPlasma.reset);
+b.onChange(RgbPlasma.reset);
 
 $controls.append( gui.domElement );
 
@@ -136,7 +211,7 @@ function line(x1,y1,x2,y2) {
   ctx.stroke();
 }
 
-$(project.run);
+$(RgbPlasma.run);
 </script>
 </body>
 </html>
